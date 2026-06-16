@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 찾아가는 과학문화바우처</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+  :root {
+    --bg:#f7f6f3; --white:#fff; --primary:#2D6A4F; --primary-light:#52b788;
+    --accent:#f4a261; --text:#1a1a1a; --text-muted:#6b7280;
+    --border:#e2e0db; --border-focus:#2D6A4F; --error:#dc2626;
+    --section-bg:#f0f4f1; --radius:10px; --shadow:0 2px 12px rgba(0,0,0,0.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px;}
+  .header{background:var(--primary);color:#fff;padding:36px 24px 28px;text-align:center;}
+  .header .badge{display:inline-block;background:var(--primary-light);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;padding:3px 10px;border-radius:20px;margin-bottom:12px;}
+  .header h1{font-size:22px;font-weight:700;line-height:1.4;margin-bottom:6px;}
+  .header p{font-size:13px;opacity:.8;line-height:1.6;}
+  .container{max-width:720px;margin:0 auto;padding:0 16px;}
+  .notice-box{background:#fff8e7;border-left:4px solid var(--accent);padding:14px 16px;margin:24px 0 0;border-radius:0 var(--radius) var(--radius) 0;font-size:12.5px;line-height:1.7;color:#5c4a1e;}
+  .notice-box .agree-row{display:flex;align-items:flex-start;gap:8px;margin-top:10px;cursor:pointer;font-weight:500;}
+  .notice-box input[type="checkbox"]{margin-top:2px;width:15px;height:15px;accent-color:var(--primary);flex-shrink:0;}
+  .section{background:var(--white);border-radius:var(--radius);padding:24px 20px;margin-top:16px;box-shadow:var(--shadow);}
+  .section-title{font-size:14px;font-weight:700;color:var(--primary);margin-bottom:18px;padding-bottom:10px;border-bottom:1.5px solid var(--section-bg);display:flex;align-items:center;gap:7px;}
+  .section-title .num{background:var(--primary);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+  .field{margin-bottom:18px;}
+  .field:last-child{margin-bottom:0;}
+  label.field-label{display:block;font-size:13px;font-weight:500;margin-bottom:7px;color:var(--text);}
+  label.field-label .req{color:var(--error);margin-left:3px;}
+  label.field-label .hint{font-size:11px;color:var(--text-muted);font-weight:400;margin-left:5px;}
+  input[type="text"],input[type="tel"],input[type="email"],select,textarea{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:7px;font-size:13.5px;font-family:inherit;color:var(--text);background:var(--white);transition:border-color .15s;outline:none;appearance:none;-webkit-appearance:none;}
+  input:focus,select:focus,textarea:focus{border-color:var(--border-focus);}
+  input.error-field,select.error-field,textarea.error-field{border-color:var(--error)!important;}
+  .field-error{font-size:11px;color:var(--error);margin-top:4px;display:none;}
+  .field-error.show{display:block;}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .radio-group,.check-group{display:flex;flex-wrap:wrap;gap:8px;}
+  .radio-group label,.check-group label{display:flex;align-items:center;gap:6px;padding:7px 13px;border:1.5px solid var(--border);border-radius:20px;cursor:pointer;font-size:13px;color:var(--text-muted);transition:all .15s;user-select:none;}
+  .radio-group input,.check-group input{width:14px;height:14px;accent-color:var(--primary);}
+  .radio-group label:has(input:checked),.check-group label:has(input:checked){border-color:var(--primary);background:#eef6f1;color:var(--primary);font-weight:500;}
+  .check-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .check-grid label{display:flex;align-items:center;gap:7px;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;color:var(--text-muted);transition:all .15s;}
+  .check-grid label:has(input:checked){border-color:var(--primary);background:#eef6f1;color:var(--primary);font-weight:500;}
+  .check-grid input{accent-color:var(--primary);}
+  /* 주소 */
+  .addr-wrap{position:relative;}
+  .addr-search-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:var(--primary);color:#fff;border:none;border-radius:5px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .addr-result{background:#f9f9f9;border:1.5px solid var(--border);border-radius:7px;margin-top:6px;max-height:200px;overflow-y:auto;display:none;}
+  .addr-result.show{display:block;}
+  .addr-item{padding:9px 13px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);line-height:1.5;}
+  .addr-item:last-child{border-bottom:none;}
+  .addr-item:hover{background:#eef6f1;}
+  .addr-item .road{font-weight:500;color:var(--text);}
+  .addr-item .jibun{font-size:11.5px;color:var(--text-muted);}
+  .addr-detail{margin-top:6px;}
+  /* 월별 */
+  .month-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+  .month-tab{padding:7px 18px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:13px;font-weight:500;cursor:pointer;color:var(--text-muted);transition:all .15s;}
+  .month-tab.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .month-panel{display:none;}
+  .month-panel.active{display:block;}
+  /* 지역 블록 */
+  .region-block{background:var(--section-bg);border-radius:8px;padding:14px;margin-bottom:10px;position:relative;}
+  .region-block .remove-region{position:absolute;top:10px;right:10px;background:none;border:1px solid #ccc;border-radius:5px;padding:2px 9px;font-size:11px;color:var(--text-muted);cursor:pointer;}
+  .region-block .remove-region:hover{border-color:var(--error);color:var(--error);}
+  .region-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .add-region-btn{display:flex;align-items:center;gap:6px;background:none;border:1.5px dashed var(--primary-light);color:var(--primary);padding:8px 16px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;margin-bottom:14px;width:100%;}
+  .add-region-btn:hover{background:#eef6f1;}
+  /* 요일 그리드 */
+  .schedule-grid{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:4px;}
+  .schedule-grid th{background:var(--section-bg);color:var(--primary);font-weight:600;padding:8px 4px;text-align:center;border:1px solid var(--border);font-size:12px;}
+  .schedule-grid td{border:1px solid var(--border);padding:0;text-align:center;}
+  .schedule-grid td label{display:flex;align-items:center;justify-content:center;padding:9px 4px;cursor:pointer;width:100%;height:100%;transition:background .1s;font-size:12px;color:var(--text-muted);gap:3px;}
+  .schedule-grid td label:has(input:checked){background:#eef6f1;color:var(--primary);font-weight:600;}
+  .schedule-grid td input[type="radio"]{width:13px;height:13px;accent-color:var(--primary);}
+  .sat{color:#2563eb;}.sun{color:#dc2626;}
+  .holiday-check{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:13px;cursor:pointer;color:var(--text-muted);}
+  .holiday-check input{accent-color:var(--accent);width:15px;height:15px;}
+  .holiday-check:has(input:checked){color:var(--accent);font-weight:500;}
+  .schedule-note{font-size:11.5px;color:var(--text-muted);margin-top:8px;line-height:1.6;}
+  .month-unavail{display:flex;align-items:center;gap:7px;margin-bottom:14px;font-size:13px;cursor:pointer;color:var(--text-muted);}
+  .month-unavail input{accent-color:var(--accent);width:15px;height:15px;}
+  .month-unavail.checked{color:var(--accent);font-weight:500;}
+  .month-content{transition:opacity .2s;}
+  .month-content.disabled{opacity:.35;pointer-events:none;}
+  textarea{resize:vertical;min-height:80px;line-height:1.6;}
+  .char-count{font-size:11px;color:var(--text-muted);text-align:right;margin-top:4px;}
+  .char-count.over{color:var(--error);}
+  /* 개인정보 동의 */
+  .privacy-box{background:#f0f4f1;border:1.5px solid var(--primary-light);border-radius:var(--radius);padding:16px;margin-top:16px;}
+  .privacy-box h4{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:10px;}
+  .privacy-box p{font-size:12px;color:var(--text-muted);line-height:1.75;margin-bottom:10px;}
+  .privacy-agree{display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text);}
+  .privacy-agree input{margin-top:2px;width:16px;height:16px;accent-color:var(--primary);flex-shrink:0;}
+  .submit-btn{display:block;width:100%;max-width:720px;margin:24px auto 0;padding:15px;background:var(--primary);color:#fff;font-size:15px;font-weight:700;border:none;border-radius:var(--radius);cursor:pointer;font-family:inherit;letter-spacing:.03em;transition:background .15s,transform .1s;}
+  .submit-btn:hover{background:#1e5038;}
+  .submit-btn:active{transform:scale(.99);}
+  .submit-btn:disabled{background:#9ca3af;cursor:not-allowed;}
+  .success-msg{display:none;background:var(--white);border-radius:var(--radius);padding:40px 24px;text-align:center;margin-top:24px;box-shadow:var(--shadow);}
+  .success-msg .icon{font-size:48px;margin-bottom:16px;}
+  .success-msg h2{font-size:18px;font-weight:700;color:var(--primary);margin-bottom:8px;}
+  .success-msg p{font-size:13px;color:var(--text-muted);line-height:1.7;}
+  .loading-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+  .loading-overlay.show{display:flex;}
+  .spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+  .loading-overlay p{color:#fff;font-size:14px;font-weight:500;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
+  @media(max-width:480px){.row-2,.region-row{grid-template-columns:1fr;}.check-grid{grid-template-columns:repeat(2,1fr);}.schedule-grid th,.schedule-grid td label{font-size:11px;padding:7px 2px;}.header h1{font-size:18px;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="badge">2026 찾아가는 교육 강사 모집</div>
+  <h1>강사 지원서</h1>
+  <p>아래 항목을 빠짐없이 작성해 주세요.<br>입력하신 정보는 강사 배정에 활용됩니다.</p>
+</div>
+
+<div class="container">
+  <div class="notice-box">
+    ⚠️ 관련 법령에 따라 성범죄 등 범죄 경력이 있을 경우 합격이 취소될 수 있으며, 합격자에 한해 범죄경력 조회 동의서를 별도 제출해야 합니다.
+    <label class="agree-row">
+      <input type="checkbox" id="agree-check">
+      위 내용을 확인하였으며 동의합니다. <span class="req" style="color:#dc2626">*</span>
+    </label>
+  </div>
+
+  <form id="applyForm" novalidate>
+
+    <!-- 1. 기본 정보 -->
+    <div class="section">
+      <div class="section-title"><span class="num">1</span> 기본 정보</div>
+      <div class="row-2">
+        <div class="field">
+          <label class="field-label">이름 <span class="req">*</span></label>
+          <input type="text" id="name" placeholder="홍길동">
+          <div class="field-error" id="err-name">이름을 입력해 주세요.</div>
+        </div>
+        <div class="field">
+          <label class="field-label">성별 <span class="req">*</span></label>
+          <div class="radio-group" id="gender-group">
+            <label><input type="radio" name="gender" value="여성"> 여성</label>
+            <label><input type="radio" name="gender" value="남성"> 남성</label>
+          </div>
+          <div class="field-error" id="err-gender">성별을 선택해 주세요.</div>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label class="field-label">연락처 <span class="req">*</span> <span class="hint">010-0000-0000 형식</span></label>
+          <input type="tel" id="phone" placeholder="010-0000-0000" maxlength="13">
+          <div class="field-error" id="err-phone">010-0000-0000 형식으로 입력해 주세요.</div>
+        </div>
+        <div class="field">
+          <label class="field-label">이메일 <span class="req">*</span></label>
+          <input type="email" id="email" placeholder="example@email.com">
+          <div class="field-error" id="err-email">올바른 이메일을 입력해 주세요.</div>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label class="field-label">학교명 <span class="req">*</span></label>
+          <input type="text" id="school" placeholder="○○대학교">
+          <div class="field-error" id="err-school">학교명을 입력해 주세요.</div>
+        </div>
+        <div class="field">
+          <label class="field-label">학년 <span class="req">*</span></label>
+          <select id="grade">
+            <option value="">선택</option>
+            <option>1학년</option><option>2학년</option><option>3학년</option>
+            <option>4학년</option><option>5학년(초과)</option><option>대학원생</option>
+          </select>
+          <div class="field-error" id="err-grade">학년을 선택해 주세요.</div>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label class="field-label">전공 계열 <span class="req">*</span></label>
+          <select id="major-dept">
+            <option value="">계열 선택</option>
+            <option value="교육">교육 계열</option>
+            <option value="공학/기술">공학·기술 계열</option>
+            <option value="자연과학">자연과학 계열</option>
+            <option value="인문사회">인문·사회 계열</option>
+            <option value="예체능">예체능 계열</option>
+            <option value="의약·보건">의약·보건 계열</option>
+            <option value="기타">기타</option>
+          </select>
+          <div class="field-error" id="err-major-dept">전공 계열을 선택해 주세요.</div>
+        </div>
+        <div class="field">
+          <label class="field-label">학과명 <span class="req">*</span> <span class="hint">예) 유아교육과</span></label>
+          <input type="text" id="major-name" placeholder="학과명 직접 입력">
+          <div class="field-error" id="err-major-name">학과명을 입력해 주세요.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 이동 수단 및 교구 수령 -->
+    <div class="section">
+      <div class="section-title"><span class="num">2</span> 이동 수단 및 교구 수령</div>
+      <div class="field">
+        <label class="field-label">자차 활용 여부 <span class="req">*</span></label>
+        <div class="radio-group" id="car-group">
+          <label><input type="radio" name="car" value="자차 활용 가능"> 자차 활용 가능</label>
+          <label><input type="radio" name="car" value="대중교통만 가능"> 대중교통만 가능</label>
+          <label><input type="radio" name="car" value="면허 없음"> 면허 없음</label>
+        </div>
+        <div class="field-error" id="err-car">이동 수단을 선택해 주세요.</div>
+      </div>
+      <div class="field">
+        <label class="field-label">교구 수령 주소 <span class="req">*</span> <span class="hint">도로명 주소로 검색</span></label>
+        <div class="addr-wrap">
+          <input type="text" id="addr-search-input" placeholder="도로명·건물명으로 검색 (예: 천안 신부동로)" readonly style="cursor:pointer;background:#f9f9f9;" onclick="openAddrSearch()">
+          <button type="button" class="addr-search-btn" onclick="openAddrSearch()">주소 검색</button>
+        </div>
+        <div class="addr-result" id="addr-result"></div>
+        <input type="text" id="addr-detail" class="addr-detail" placeholder="상세 주소 입력 (동·호수 등)" style="display:none;margin-top:6px;">
+        <input type="hidden" id="addr-full">
+        <div class="field-error" id="err-addr">주소를 검색 후 선택해 주세요.</div>
+      </div>
+    </div>
+
+    <!-- 3. 월별 활동 가능 일정 -->
+    <div class="section">
+      <div class="section-title"><span class="num">3</span> 월별 활동 가능 일정</div>
+      <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;">
+        월을 선택하고 활동 가능 지역과 요일·시간대를 입력해 주세요.<br>
+        같은 달에 지역이 여러 곳이라면 <strong>+ 지역 추가</strong> 버튼으로 추가할 수 있습니다.
+      </p>
+      <div class="month-tabs">
+        <button type="button" class="month-tab active" data-month="7">7월</button>
+        <button type="button" class="month-tab" data-month="8">8월</button>
+        <button type="button" class="month-tab" data-month="9">9월</button>
+        <button type="button" class="month-tab" data-month="10">10월</button>
+      </div>
+      <div id="panel-7" class="month-panel active"></div>
+      <div id="panel-8" class="month-panel"></div>
+      <div id="panel-9" class="month-panel"></div>
+      <div id="panel-10" class="month-panel"></div>
+    </div>
+
+    <!-- 4. 교육 역량 -->
+    <div class="section">
+      <div class="section-title"><span class="num">4</span> 교육 역량 및 경험</div>
+      <div class="field">
+        <label class="field-label">교육 대상 경험 <span class="req">*</span> <span class="hint">해당하는 것 모두 선택</span></label>
+        <div class="check-grid" id="target-group">
+          <label><input type="checkbox" name="target" value="유아(5~7세)"> 유아 (5~7세)</label>
+          <label><input type="checkbox" name="target" value="초등 저학년"> 초등 저학년</label>
+          <label><input type="checkbox" name="target" value="초등 고학년"> 초등 고학년</label>
+          <label><input type="checkbox" name="target" value="중학생"> 중학생</label>
+          <label><input type="checkbox" name="target" value="고등학생"> 고등학생</label>
+          <label><input type="checkbox" name="target" value="경험 없음"> 경험 없음</label>
+        </div>
+        <div class="field-error" id="err-target">교육 대상 경험을 하나 이상 선택해 주세요.</div>
+      </div>
+      <div class="field">
+        <label class="field-label">과학·메이커 교구 활용 경험 <span class="req">*</span></label>
+        <div class="radio-group" id="maker-group">
+          <label><input type="radio" name="maker" value="많음 (관련 수업·활동 다수)"> 많음</label>
+          <label><input type="radio" name="maker" value="보통 (키트 조립 등 일부 경험)"> 보통</label>
+          <label><input type="radio" name="maker" value="없음"> 없음</label>
+        </div>
+        <div class="field-error" id="err-maker">경험을 선택해 주세요.</div>
+      </div>
+      <div class="field">
+        <label class="field-label">지원 동기 <span class="hint">선택, 50자 이내</span></label>
+        <textarea id="motivation" placeholder="간략하게 적어주세요." maxlength="50" oninput="updateCount(this,'moti-count',50)"></textarea>
+        <div class="char-count" id="moti-count">0 / 50자</div>
+      </div>
+    </div>
+
+    <!-- 개인정보 동의 -->
+    <div class="privacy-box">
+      <h4>📋 개인정보 수집·이용 동의</h4>
+      <p>
+        수집 항목: 이름, 연락처, 이메일, 학교·학과 정보, 주소, 활동 가능 일정<br>
+        수집 목적: 교육 강사 배정, 수업 일정 조율, 교구 발송 및 강사 관련 공지<br>
+        보유 기간: 모집 종료 후 1년 이내 파기<br><br>
+        수집된 개인정보는 강사 모집 및 운영 목적 이외에는 사용되지 않으며,
+        제3자에게 제공하지 않습니다. 동의를 거부하실 수 있으나,
+        거부 시 지원이 불가합니다.
+      </p>
+      <label class="privacy-agree">
+        <input type="checkbox" id="privacy-check">
+        위 개인정보 수집·이용에 동의합니다. <span style="color:#dc2626;margin-left:2px;">*</span>
+      </label>
+      <div class="field-error" id="err-privacy" style="margin-top:6px;">개인정보 수집·이용에 동의해 주세요.</div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">지원서 제출하기</button>
+  </form>
+
+  <div class="success-msg" id="successMsg">
+    <div class="icon">✅</div>
+    <h2>지원서가 제출되었습니다!</h2>
+    <p>소중한 지원 감사합니다.<br>검토 후 개별 연락드리겠습니다.</p>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <p>제출 중입니다...</p>
+</div>
+
+<!-- 주소 검색 모달 -->
+<div id="addr-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:20px;width:92%;max-width:500px;max-height:80vh;display:flex;flex-direction:column;gap:10px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <strong style="font-size:14px;color:var(--primary);">🔍 도로명 주소 검색</strong>
+      <button type="button" onclick="closeAddrModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888;">✕</button>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="modal-addr-input" placeholder="도로명·건물명 입력 후 검색" style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();searchAddr();}">
+      <button type="button" onclick="searchAddr()" style="background:var(--primary);color:#fff;border:none;border-radius:7px;padding:0 16px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;">검색</button>
+    </div>
+    <div id="modal-addr-list" style="overflow-y:auto;flex:1;border:1px solid var(--border);border-radius:7px;min-height:80px;"></div>
+    <p style="font-size:11px;color:var(--text-muted);">행정안전부 도로명주소 API 제공</p>
+  </div>
+</div>
+
+<script>
+// ========== 전국 시도→시군구 ==========
+const REGIONS = {
+  "서울특별시":["강남구","강동구","강북구","강서구","관악구","광진구","구로구","금천구","노원구","도봉구","동대문구","동작구","마포구","서대문구","서초구","성동구","성북구","송파구","양천구","영등포구","용산구","은평구","종로구","중구","중랑구"],
+  "부산광역시":["강서구","금정구","기장군","남구","동구","동래구","북구","사상구","사하구","서구","수영구","연제구","영도구","중구","해운대구"],
+  "대구광역시":["군위군","남구","달서구","달성군","동구","북구","서구","수성구","중구"],
+  "인천광역시":["강화군","계양구","남동구","동구","미추홀구","부평구","서구","연수구","옹진군","중구"],
+  "광주광역시":["광산구","남구","동구","북구","서구"],
+  "대전광역시":["대덕구","동구","서구","유성구","중구"],
+  "울산광역시":["남구","동구","북구","울주군","중구"],
+  "세종특별자치시":["세종시 전체"],
+  "경기도":["가평군","고양시 덕양구","고양시 일산동구","고양시 일산서구","과천시","광명시","광주시","구리시","군포시","김포시","남양주시","동두천시","부천시","성남시 분당구","성남시 수정구","성남시 중원구","수원시 권선구","수원시 영통구","수원시 장안구","수원시 팔달구","시흥시","안산시 단원구","안산시 상록구","안성시","안양시 동안구","안양시 만안구","양주시","양평군","여주시","연천군","오산시","용인시 기흥구","용인시 수지구","용인시 처인구","의왕시","의정부시","이천시","파주시","평택시","포천시","하남시","화성시"],
+  "강원특별자치도":["강릉시","고성군","동해시","삼척시","속초시","양구군","양양군","영월군","원주시","인제군","정선군","철원군","춘천시","태백시","평창군","홍천군","화천군","횡성군"],
+  "충청북도":["괴산군","단양군","보은군","영동군","옥천군","음성군","제천시","증평군","진천군","청주시 상당구","청주시 서원구","청주시 청원구","청주시 흥덕구","충주시"],
+  "충청남도":["계룡시","공주시","금산군","논산시","당진시","보령시","부여군","서산시","서천군","아산시","예산군","천안시 동남구","천안시 서북구","청양군","태안군","홍성군"],
+  "전북특별자치도":["고창군","군산시","김제시","남원시","무주군","부안군","순창군","완주군","익산시","임실군","장수군","전주시 덕진구","전주시 완산구","정읍시","진안군"],
+  "전라남도":["강진군","고흥군","곡성군","광양시","구례군","나주시","담양군","목포시","무안군","보성군","순천시","신안군","여수시","영광군","영암군","완도군","장성군","장흥군","진도군","함평군","해남군","화순군"],
+  "경상북도":["경산시","경주시","고령군","구미시","김천시","문경시","봉화군","상주시","성주군","안동시","영덕군","영양군","영주시","영천시","예천군","울릉군","울진군","의성군","청도군","청송군","칠곡군","포항시 남구","포항시 북구"],
+  "경상남도":["거제시","거창군","고성군","김해시","남해군","밀양시","사천시","산청군","양산시","의령군","진주시","창녕군","창원시 마산합포구","창원시 마산회원구","창원시 성산구","창원시 의창구","창원시 진해구","통영시","하동군","함안군","함양군","합천군"],
+  "제주특별자치도":["서귀포시","제주시"],
+  "도서·벽지":["인천 옹진군 도서","전남 신안군 도서","경남 통영시 도서","강원 고성군 해안","기타 도서·벽지"]
+};
+const MONTHS=[7,8,9,10];
+const DAYS=["월","화","수","목","금","토","일"];
+const TIMES=["오전","오후","종일","불가"];
+
+// ========== 월별 패널 초기화 ==========
+function buildMonthPanel(m) {
+  const panel = document.getElementById(`panel-${m}`);
+  panel.innerHTML = `
+    <label class="month-unavail" id="unavail-label-${m}">
+      <input type="checkbox" id="unavail-${m}" onchange="toggleMonth(${m})">
+      ${m}월은 활동 불가
+    </label>
+    <div class="month-content" id="content-${m}">
+      <div id="regions-${m}"></div>
+      <button type="button" class="add-region-btn" onclick="addRegion(${m})">
+        ＋ 지역 추가 &nbsp;<span style="font-size:11px;font-weight:400;color:var(--text-muted);">(같은 달에 활동 지역이 여러 곳인 경우)</span>
+      </button>
+      <div style="margin-top:4px;">
+        <label class="field-label">가능 요일 · 시간대 <span class="req">*</span></label>
+        <div id="grid-${m}"></div>
+        <label class="holiday-check">
+          <input type="checkbox" id="holiday-${m}">
+          명절·공휴일 제외 (해당 날짜는 활동 불가)
+        </label>
+        <div class="schedule-note">※ 특정 주만 가능하거나 추가 안내할 내용이 있으면 적어주세요.</div>
+        <input type="text" id="note-${m}" placeholder="예) 7/14~7/18만 가능, 특정 날짜 제외 등" style="margin-top:8px;">
+      </div>
+    </div>`;
+  addRegion(m);
+  buildGrid(m);
+}
+
+let regionCount = {7:0, 8:0, 9:0, 10:0};
+
+// 월별 날짜 범위 (달력에 표시할 min/max)
+const MONTH_RANGES = {
+  7:  { min: '2026-07-01', max: '2026-07-31' },
+  8:  { min: '2026-08-01', max: '2026-08-31' },
+  9:  { min: '2026-09-01', max: '2026-09-30' },
+  10: { min: '2026-10-01', max: '2026-10-31' }
+};
+
+function addRegion(m) {
+  regionCount[m]++;
+  const idx = regionCount[m];
+  const wrap = document.getElementById(`regions-${m}`);
+  const block = document.createElement('div');
+  block.className = 'region-block';
+  block.id = `region-block-${m}-${idx}`;
+  const range = MONTH_RANGES[m];
+  block.innerHTML = `
+    ${idx > 1 ? `<button type="button" class="remove-region" onclick="removeRegion(${m},${idx})">삭제</button>` : ''}
+    <div style="font-size:12px;font-weight:600;color:var(--primary);margin-bottom:10px;">활동 지역 ${idx > 1 ? idx : ''}</div>
+    <div class="region-row">
+      <div class="field" style="margin-bottom:0;">
+        <label class="field-label">시·도 <span class="req">*</span></label>
+        <select id="sido-${m}-${idx}" onchange="updateSigungu(${m},${idx})">
+          <option value="">시·도 선택</option>
+          ${Object.keys(REGIONS).map(s=>`<option value="${s}">${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label class="field-label">시·군·구 <span class="req">*</span></label>
+        <select id="sigungu-${m}-${idx}">
+          <option value="">먼저 시·도를 선택하세요</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:12px;">
+      <label class="field-label">이 지역에서 활동 가능한 기간 <span class="req">*</span> <span class="hint">달력에서 시작일~종료일 선택</span></label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center;">
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">시작일</div>
+          <input type="date" id="date-start-${m}-${idx}" min="${range.min}" max="${range.max}"
+            style="width:100%;" onchange="validateDateRange(${m},${idx})">
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">종료일</div>
+          <input type="date" id="date-end-${m}-${idx}" min="${range.min}" max="${range.max}"
+            style="width:100%;" onchange="validateDateRange(${m},${idx})">
+        </div>
+      </div>
+      <div id="date-err-${m}-${idx}" style="font-size:11px;color:var(--error);margin-top:4px;display:none;">
+        종료일은 시작일 이후여야 합니다.
+      </div>
+      <div id="date-preview-${m}-${idx}" style="font-size:12px;color:var(--primary);font-weight:500;margin-top:6px;display:none;"></div>
+    </div>`;
+  wrap.appendChild(block);
+}
+
+function validateDateRange(m, idx) {
+  const start = document.getElementById(`date-start-${m}-${idx}`).value;
+  const end = document.getElementById(`date-end-${m}-${idx}`).value;
+  const errEl = document.getElementById(`date-err-${m}-${idx}`);
+  const previewEl = document.getElementById(`date-preview-${m}-${idx}`);
+  if (start && end) {
+    if (end < start) {
+      errEl.style.display = 'block';
+      previewEl.style.display = 'none';
+    } else {
+      errEl.style.display = 'none';
+      const s = new Date(start), e = new Date(end);
+      const days = Math.round((e-s)/(1000*60*60*24))+1;
+      previewEl.textContent = `✅ ${start.replace('2026-','')} ~ ${end.replace('2026-','')} (총 ${days}일)`;
+      previewEl.style.display = 'block';
+    }
+  } else {
+    errEl.style.display = 'none';
+    previewEl.style.display = start || end ? 'none' : 'none';
+  }
+}
+
+function removeRegion(m, idx) {
+  const el = document.getElementById(`region-block-${m}-${idx}`);
+  if (el) el.remove();
+}
+
+function updateSigungu(m, idx) {
+  const sido = document.getElementById(`sido-${m}-${idx}`).value;
+  const sel = document.getElementById(`sigungu-${m}-${idx}`);
+  sel.innerHTML = '';
+  if (!sido) { sel.innerHTML = '<option value="">먼저 시·도를 선택하세요</option>'; return; }
+  const all = document.createElement('option');
+  all.value = sido + ' 전체'; all.textContent = '전체 (시·군·구 무관)';
+  sel.appendChild(all);
+  (REGIONS[sido]||[]).forEach(sg => {
+    const o = document.createElement('option');
+    o.value = sg; o.textContent = sg; sel.appendChild(o);
+  });
+}
+
+function buildGrid(m) {
+  const container = document.getElementById(`grid-${m}`);
+  let html = `<table class="schedule-grid"><thead><tr><th>요일</th>`;
+  TIMES.forEach(t => { html += `<th>${t}</th>`; });
+  html += `</tr></thead><tbody>`;
+  DAYS.forEach((day, di) => {
+    const cls = di===5?'sat':di===6?'sun':'';
+    html += `<tr><td><span style="font-weight:600;" class="${cls}">${day}</span></td>`;
+    TIMES.forEach(time => {
+      html += `<td><label><input type="radio" name="sched-${m}-${day}" value="${time}"></label></td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table>`;
+  container.innerHTML = html;
+}
+
+function toggleMonth(m) {
+  const cb = document.getElementById(`unavail-${m}`);
+  const content = document.getElementById(`content-${m}`);
+  const label = document.getElementById(`unavail-label-${m}`);
+  content.classList.toggle('disabled', cb.checked);
+  label.classList.toggle('checked', cb.checked);
+}
+
+// ========== 월 탭 ==========
+document.querySelectorAll('.month-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.month-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.month-panel').forEach(p=>p.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById(`panel-${this.dataset.month}`).classList.add('active');
+  });
+});
+
+// ========== 전화번호 자동 포맷 ==========
+document.getElementById('phone').addEventListener('input', function() {
+  let v = this.value.replace(/\D/g,'');
+  if (v.length<=3) this.value=v;
+  else if (v.length<=7) this.value=v.slice(0,3)+'-'+v.slice(3);
+  else this.value=v.slice(0,3)+'-'+v.slice(3,7)+'-'+v.slice(7,11);
+});
+
+// ========== 도로명주소 API ==========
+function openAddrSearch() {
+  document.getElementById('addr-modal').style.display='flex';
+  document.getElementById('modal-addr-input').focus();
+}
+function closeAddrModal() {
+  document.getElementById('addr-modal').style.display='none';
+  document.getElementById('modal-addr-list').innerHTML='';
+  document.getElementById('modal-addr-input').value='';
+}
+
+async function searchAddr() {
+  const keyword = document.getElementById('modal-addr-input').value.trim();
+  if (!keyword) { alert('검색어를 입력해 주세요.'); return; }
+  const listEl = document.getElementById('modal-addr-list');
+  listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#888;font-size:13px;">검색 중...</div>';
+  try {
+    const url = `https://business.juso.go.kr/addrlink/addrLinkApi.do?currentPage=1&countPerPage=20&keyword=${encodeURIComponent(keyword)}&confmKey=U01TX0FVVEgyMDI2MDQxNDIwMzYxNjExNzkzMjk=&resultType=json`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const results = data?.results?.juso;
+    if (!results || results.length===0) {
+      listEl.innerHTML='<div style="padding:16px;text-align:center;color:#888;font-size:13px;">검색 결과가 없습니다.<br>다른 키워드로 검색해 보세요.</div>';
+      return;
+    }
+    listEl.innerHTML = results.map(j=>`
+      <div class="addr-item" onclick="selectAddr('${j.roadAddr.replace(/'/g,"\\'")}','${j.jibunAddr.replace(/'/g,"\\'")}')">
+        <div class="road">📍 ${j.roadAddr}</div>
+        <div class="jibun">지번: ${j.jibunAddr}</div>
+      </div>`).join('');
+  } catch(e) {
+    // API 키 문제 시 데모 처리
+    listEl.innerHTML=`
+      <div class="addr-item" onclick="selectAddr('${keyword} (검색 결과)','')">
+        <div class="road">📍 ${keyword}</div>
+        <div class="jibun">※ API 키 설정 후 실제 검색이 가능합니다</div>
+      </div>`;
+  }
+}
+
+function selectAddr(road, jibun) {
+  document.getElementById('addr-search-input').value = road;
+  document.getElementById('addr-full').value = road;
+  document.getElementById('addr-detail').style.display='block';
+  document.getElementById('addr-detail').focus();
+  document.getElementById('err-addr').classList.remove('show');
+  document.getElementById('addr-search-input').classList.remove('error-field');
+  closeAddrModal();
+}
+
+// ========== 글자수 ==========
+function updateCount(el, countId, max) {
+  const len=el.value.length;
+  const el2=document.getElementById(countId);
+  el2.textContent=`${len} / ${max}자`;
+  el2.classList.toggle('over',len>max);
+}
+
+// ========== 유효성 검사 ==========
+function setErr(fieldId, errId, show) {
+  const f=document.getElementById(fieldId);
+  if(f) f.classList.toggle('error-field',show);
+  const e=document.getElementById(errId);
+  if(e) e.classList.toggle('show',show);
+}
+function showErrOnly(errId, show) {
+  const e=document.getElementById(errId);
+  if(e) e.classList.toggle('show',show);
+}
+
+function validate() {
+  let ok=true, firstErrEl=null;
+
+  function markErr(fieldId, errId, cond) {
+    setErr(fieldId, errId, cond);
+    if(cond && !firstErrEl) firstErrEl = document.getElementById(errId)||document.getElementById(fieldId);
+    if(cond) ok=false;
+  }
+  function markErrOnly(errId, cond) {
+    showErrOnly(errId, cond);
+    if(cond && !firstErrEl) firstErrEl = document.getElementById(errId);
+    if(cond) ok=false;
+  }
+
+  // 결격사유 동의
+  if(!document.getElementById('agree-check').checked) {
+    alert('결격사유 확인 및 동의가 필요합니다.');
+    ok=false;
+  }
+
+  markErr('name','err-name',!document.getElementById('name').value.trim());
+  markErrOnly('err-gender',!document.querySelector('input[name="gender"]:checked'));
+  const phone=document.getElementById('phone').value;
+  markErr('phone','err-phone',!/^010-\d{4}-\d{4}$/.test(phone));
+  const email=document.getElementById('email').value.trim();
+  markErr('email','err-email',!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+  markErr('school','err-school',!document.getElementById('school').value.trim());
+  markErr('grade','err-grade',!document.getElementById('grade').value);
+  markErr('major-dept','err-major-dept',!document.getElementById('major-dept').value);
+  markErr('major-name','err-major-name',!document.getElementById('major-name').value.trim());
+  markErrOnly('err-car',!document.querySelector('input[name="car"]:checked'));
+  markErr('addr-search-input','err-addr',!document.getElementById('addr-full').value.trim());
+
+  // 일정: 4개월 중 최소 1개월 이상 체크되어야 함
+  let hasActiveMonth = false;
+  MONTHS.forEach(m => {
+    const unavail = document.getElementById(`unavail-${m}`).checked;
+    if(!unavail) {
+      hasActiveMonth = true;
+      // 지역 선택 확인 (첫번째 블록)
+      const sido1 = document.getElementById(`sido-${m}-1`);
+      if(sido1 && !sido1.value) {
+        sido1.classList.add('error-field');
+        if(!firstErrEl) firstErrEl = sido1;
+        ok = false;
+      }
+      // 요일 선택 확인
+      let allDaysFilled = true;
+      DAYS.forEach(day => {
+        if(!document.querySelector(`input[name="sched-${m}-${day}"]:checked`)) allDaysFilled=false;
+      });
+      if(!allDaysFilled) {
+        const gridEl = document.getElementById(`grid-${m}`);
+        if(gridEl && !firstErrEl) firstErrEl = gridEl;
+        ok = false;
+        if(!document.getElementById(`sched-warn-${m}`)) {
+          const warn = document.createElement('div');
+          warn.id = `sched-warn-${m}`; warn.className='field-error show';
+          warn.textContent='모든 요일에 대해 가능 여부를 선택해 주세요.';
+          gridEl.parentNode.insertBefore(warn, gridEl.nextSibling);
+        }
+      } else {
+        const w = document.getElementById(`sched-warn-${m}`);
+        if(w) w.remove();
+      }
+    }
+  });
+  if(!hasActiveMonth) {
+    alert('최소 1개월 이상 활동 가능한 기간을 선택해 주세요.');
+    ok=false;
+  }
+
+  markErrOnly('err-target', document.querySelectorAll('input[name="target"]:checked').length===0);
+  markErrOnly('err-maker',!document.querySelector('input[name="maker"]:checked'));
+
+  // 개인정보 동의
+  markErrOnly('err-privacy', !document.getElementById('privacy-check').checked);
+
+  if(firstErrEl) setTimeout(()=>firstErrEl.scrollIntoView({behavior:'smooth',block:'center'}),100);
+  return ok;
+}
+
+// ========== 데이터 수집 ==========
+function collectData() {
+  const sched = {};
+  MONTHS.forEach(m => {
+    const unavail = document.getElementById(`unavail-${m}`).checked;
+    sched[`${m}월_활동불가`] = unavail ? 'Y' : 'N';
+    if(unavail) {
+      sched[`${m}월_지역`]='-';
+      DAYS.forEach(d=>{ sched[`${m}월_${d}`]='-'; });
+      sched[`${m}월_명절공휴일제외`]='-';
+      sched[`${m}월_비고`]='-';
+    } else {
+      // 지역 + 날짜 수집
+      const regions = [];
+      document.querySelectorAll(`[id^="sido-${m}-"]`).forEach(sidoEl => {
+        const parts = sidoEl.id.split('-');
+        const idx = parts[parts.length-1];
+        const sido = sidoEl.value;
+        const sigungu = document.getElementById(`sigungu-${m}-${idx}`)?.value || '';
+        const dateStart = document.getElementById(`date-start-${m}-${idx}`)?.value || '';
+        const dateEnd = document.getElementById(`date-end-${m}-${idx}`)?.value || '';
+        if(sido) {
+          const regionName = sido + (sigungu ? ' ' + sigungu : '');
+          const dateRange = dateStart && dateEnd ? `(${dateStart.replace('2026-','')}~${dateEnd.replace('2026-','')})` : '(날짜미정)';
+          regions.push(regionName + ' ' + dateRange);
+        }
+      });
+      sched[`${m}월_지역`] = regions.join(' / ') || '미선택';
+      DAYS.forEach(day => {
+        const checked = document.querySelector(`input[name="sched-${m}-${day}"]:checked`);
+        sched[`${m}월_${day}`] = checked ? checked.value : '미선택';
+      });
+      sched[`${m}월_명절공휴일제외`] = document.getElementById(`holiday-${m}`).checked ? 'Y' : 'N';
+      sched[`${m}월_비고`] = document.getElementById(`note-${m}`)?.value.trim() || '';
+    }
+  });
+  const addrBase = document.getElementById('addr-full').value.trim();
+  const addrDetail = document.getElementById('addr-detail').value.trim();
+  return {
+    제출일시: new Date().toLocaleString('ko-KR'),
+    이름: document.getElementById('name').value.trim(),
+    성별: document.querySelector('input[name="gender"]:checked')?.value||'',
+    연락처: document.getElementById('phone').value,
+    이메일: document.getElementById('email').value.trim(),
+    학교: document.getElementById('school').value.trim(),
+    학년: document.getElementById('grade').value,
+    전공계열: document.getElementById('major-dept').value,
+    학과명: document.getElementById('major-name').value.trim(),
+    자차여부: document.querySelector('input[name="car"]:checked')?.value||'',
+    교구수령주소: addrBase + (addrDetail ? ' ' + addrDetail : ''),
+    교육대상경험: [...document.querySelectorAll('input[name="target"]:checked')].map(i=>i.value).join(', '),
+    메이커교구경험: document.querySelector('input[name="maker"]:checked')?.value||'',
+    지원동기: document.getElementById('motivation').value.trim(),
+    ...sched
+  };
+}
+
+// ========== 구글 시트 전송 ==========
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyt-FN_DwpAXBjguSQOoP32bRFct0yz-vyE5t5b047LVRm6gsK8ENV47oN-6gEq3T9Txw/exec';
+
+async function submitToSheet(data) {
+  return new Promise((resolve) => {
+    let iframe = document.getElementById('hidden-iframe');
+    if (!iframe) {
+      iframe = document.createElement('iframe');
+      iframe.name = 'hidden-iframe';
+      iframe.id = 'hidden-iframe';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+    }
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = SHEET_URL;
+    form.target = 'hidden-iframe';
+    form.style.display = 'none';
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'payload';
+    input.value = JSON.stringify(data);
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+    setTimeout(() => resolve(true), 3000);
+  });
+}
+
+// ========== 제출 ==========
+document.getElementById('applyForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if(!validate()) return;
+  const overlay=document.getElementById('loadingOverlay');
+  overlay.classList.add('show');
+  document.getElementById('submitBtn').disabled=true;
+  try {
+    await submitToSheet(collectData());
+    overlay.classList.remove('show');
+    document.getElementById('applyForm').style.display='none';
+    document.getElementById('successMsg').style.display='block';
+    window.scrollTo({top:0,behavior:'smooth'});
+  } catch(err) {
+    overlay.classList.remove('show');
+    document.getElementById('submitBtn').disabled=false;
+    alert('제출 중 오류가 발생했습니다. 다시 시도해 주세요.');
+  }
+});
+
+// ========== 초기화 ==========
+MONTHS.forEach(m => buildMonthPanel(m));
+</script>
+</body>
+</html>

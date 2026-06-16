@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026 찾아가는 과학문화바우처</title>
+<title>과학문화바우처 강사 모집</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
   :root {
@@ -19,9 +19,9 @@
   .header h1{font-size:22px;font-weight:700;line-height:1.4;margin-bottom:6px;}
   .header p{font-size:13px;opacity:.8;line-height:1.6;}
   .container{max-width:720px;margin:0 auto;padding:0 16px;}
-  .notice-box{background:#fff8e7;border-left:4px solid var(--accent);padding:14px 16px;margin:24px 0 0;border-radius:0 var(--radius) var(--radius) 0;font-size:12.5px;line-height:1.7;color:#5c4a1e;}
-  .notice-box .agree-row{display:flex;align-items:flex-start;gap:8px;margin-top:10px;cursor:pointer;font-weight:500;}
-  .notice-box input[type="checkbox"]{margin-top:2px;width:15px;height:15px;accent-color:var(--primary);flex-shrink:0;}
+  .notice-box{background:#f0f4f1;border:1.5px solid var(--primary-light);border-radius:var(--radius);padding:16px;margin-top:16px;font-size:12px;line-height:1.75;color:var(--text-muted);}
+  .notice-box .agree-row{display:flex;align-items:flex-start;gap:8px;margin-top:10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text);}
+  .notice-box input[type="checkbox"]{margin-top:2px;width:16px;height:16px;accent-color:var(--primary);flex-shrink:0;}
   .section{background:var(--white);border-radius:var(--radius);padding:24px 20px;margin-top:16px;box-shadow:var(--shadow);}
   .section-title{font-size:14px;font-weight:700;color:var(--primary);margin-bottom:18px;padding-bottom:10px;border-bottom:1.5px solid var(--section-bg);display:flex;align-items:center;gap:7px;}
   .section-title .num{background:var(--primary);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
@@ -113,19 +113,13 @@
 </head>
 <body>
 <div class="header">
-  <div class="badge">2026 찾아가는 교육 강사 모집</div>
-  <h1>강사 지원서</h1>
+  <div class="badge">2026 찾아가는 과학문화바우처</div>
+  <h1>강사 모집</h1>
   <p>아래 항목을 빠짐없이 작성해 주세요.<br>입력하신 정보는 강사 배정에 활용됩니다.</p>
 </div>
 
 <div class="container">
-  <div class="notice-box">
-    ⚠️ 관련 법령에 따라 성범죄 등 범죄 경력이 있을 경우 합격이 취소될 수 있으며, 합격자에 한해 범죄경력 조회 동의서를 별도 제출해야 합니다.
-    <label class="agree-row">
-      <input type="checkbox" id="agree-check">
-      위 내용을 확인하였으며 동의합니다. <span class="req" style="color:#dc2626">*</span>
-    </label>
-  </div>
+
 
   <form id="applyForm" novalidate>
 
@@ -149,7 +143,7 @@
       </div>
       <div class="row-2">
         <div class="field">
-          <label class="field-label">연락처 <span class="req">*</span> <span class="hint">010-0000-0000 형식</span></label>
+          <label class="field-label">연락처 <span class="req">*</span> <span class="hint">번호만 입력</span></label>
           <input type="tel" id="phone" placeholder="010-0000-0000" maxlength="13">
           <div class="field-error" id="err-phone">010-0000-0000 형식으로 입력해 주세요.</div>
         </div>
@@ -170,7 +164,7 @@
           <select id="grade">
             <option value="">선택</option>
             <option>1학년</option><option>2학년</option><option>3학년</option>
-            <option>4학년</option><option>5학년(초과)</option><option>대학원생</option>
+            <option>4학년</option><option>5학년 이상</option><option>대학원생</option>
           </select>
           <div class="field-error" id="err-grade">학년을 선택해 주세요.</div>
         </div>
@@ -191,29 +185,31 @@
           <div class="field-error" id="err-major-dept">전공 계열을 선택해 주세요.</div>
         </div>
         <div class="field">
-          <label class="field-label">학과명 <span class="req">*</span> <span class="hint">예) 유아교육과</span></label>
+          <label class="field-label">학과명 <span class="req">*</span> <span class="hint">예) 초등교육과</span></label>
           <input type="text" id="major-name" placeholder="학과명 직접 입력">
           <div class="field-error" id="err-major-name">학과명을 입력해 주세요.</div>
         </div>
       </div>
     </div>
 
-    <!-- 2. 이동 수단 및 교구 수령 -->
+    <!-- 2. 이동 수단 및 주 활동 지역 -->
     <div class="section">
-      <div class="section-title"><span class="num">2</span> 이동 수단 및 교구 수령</div>
+      <div class="section-title"><span class="num">2</span> 이동 수단 및 주 활동 지역</div>
       <div class="field">
-        <label class="field-label">자차 활용 여부 <span class="req">*</span></label>
+        <label class="field-label">이동 수단 <span class="req">*</span></label>
         <div class="radio-group" id="car-group">
           <label><input type="radio" name="car" value="자차 활용 가능"> 자차 활용 가능</label>
           <label><input type="radio" name="car" value="대중교통만 가능"> 대중교통만 가능</label>
           <label><input type="radio" name="car" value="면허 없음"> 면허 없음</label>
+          <label><input type="radio" name="car" value="기타"> 기타</label>
+
         </div>
         <div class="field-error" id="err-car">이동 수단을 선택해 주세요.</div>
       </div>
       <div class="field">
-        <label class="field-label">교구 수령 주소 <span class="req">*</span> <span class="hint">도로명 주소로 검색</span></label>
+        <label class="field-label">주 활동 지역 <span class="req">*</span> <span class="hint">수혜기관과의 거리를 고려하여 배정하오니 되도록 정확한 주소를 입력해 주시기 바랍니다. (동·호수 입력x)</span></label>
         <div class="addr-wrap">
-          <input type="text" id="addr-search-input" placeholder="도로명·건물명으로 검색 (예: 천안 신부동로)" readonly style="cursor:pointer;background:#f9f9f9;" onclick="openAddrSearch()">
+          <input type="text" id="addr-search-input" placeholder="도로명·건물명으로 검색" readonly style="cursor:pointer;background:#f9f9f9;" onclick="openAddrSearch()">
           <button type="button" class="addr-search-btn" onclick="openAddrSearch()">주소 검색</button>
         </div>
         <div class="addr-result" id="addr-result"></div>
@@ -235,11 +231,13 @@
         <button type="button" class="month-tab" data-month="8">8월</button>
         <button type="button" class="month-tab" data-month="9">9월</button>
         <button type="button" class="month-tab" data-month="10">10월</button>
+        <button type="button" class="month-tab" data-month="11">11월</button>
       </div>
       <div id="panel-7" class="month-panel active"></div>
       <div id="panel-8" class="month-panel"></div>
       <div id="panel-9" class="month-panel"></div>
       <div id="panel-10" class="month-panel"></div>
+      <div id="panel-11" class="month-panel"></div>
     </div>
 
     <!-- 4. 교육 역량 -->
@@ -249,10 +247,11 @@
         <label class="field-label">교육 대상 경험 <span class="req">*</span> <span class="hint">해당하는 것 모두 선택</span></label>
         <div class="check-grid" id="target-group">
           <label><input type="checkbox" name="target" value="유아(5~7세)"> 유아 (5~7세)</label>
-          <label><input type="checkbox" name="target" value="초등 저학년"> 초등 저학년</label>
-          <label><input type="checkbox" name="target" value="초등 고학년"> 초등 고학년</label>
+          <label><input type="checkbox" name="target" value="초등학생"> 초등학생</label>
           <label><input type="checkbox" name="target" value="중학생"> 중학생</label>
           <label><input type="checkbox" name="target" value="고등학생"> 고등학생</label>
+          <label><input type="checkbox" name="target" value="대학생"> 대학생</label>
+          <label><input type="checkbox" name="target" value="성인"> 성인</label>
           <label><input type="checkbox" name="target" value="경험 없음"> 경험 없음</label>
         </div>
         <div class="field-error" id="err-target">교육 대상 경험을 하나 이상 선택해 주세요.</div>
@@ -272,6 +271,14 @@
         <div class="char-count" id="moti-count">0 / 50자</div>
       </div>
     </div>
+
+  <div class="notice-box">
+    ⚠️ 관련 법령에 따라 성범죄 등 범죄 경력이 있을 경우 합격이 취소될 수 있으며, 합격자에 한해 범죄경력 조회 동의서를 별도 제출해야 합니다.
+    <label class="agree-row">
+      <input type="checkbox" id="agree-check">
+      위 내용을 확인하였으며 동의합니다. <span class="req" style="color:#dc2626">*</span>
+    </label>
+  </div>
 
     <!-- 개인정보 동의 -->
     <div class="privacy-box">
@@ -344,7 +351,7 @@ const REGIONS = {
   "제주특별자치도":["서귀포시","제주시"],
   "도서·벽지":["인천 옹진군 도서","전남 신안군 도서","경남 통영시 도서","강원 고성군 해안","기타 도서·벽지"]
 };
-const MONTHS=[7,8,9,10];
+const MONTHS=[7,8,9,10,11];
 const DAYS=["월","화","수","목","금","토","일"];
 const TIMES=["오전","오후","종일","불가"];
 
@@ -362,13 +369,13 @@ function buildMonthPanel(m) {
         ＋ 지역 추가 &nbsp;<span style="font-size:11px;font-weight:400;color:var(--text-muted);">(같은 달에 활동 지역이 여러 곳인 경우)</span>
       </button>
       <div style="margin-top:4px;">
-        <label class="field-label">가능 요일 · 시간대 <span class="req">*</span></label>
+        <label class="field-label">월별 활동 가능 요일 · 시간대 <span class="req">*</span></label>
         <div id="grid-${m}"></div>
         <label class="holiday-check">
           <input type="checkbox" id="holiday-${m}">
           명절·공휴일 제외 (해당 날짜는 활동 불가)
         </label>
-        <div class="schedule-note">※ 특정 주만 가능하거나 추가 안내할 내용이 있으면 적어주세요.</div>
+        <div class="schedule-note">※ 특정 기간만 가능하거나 기타 전달사항이 있으면 적어주세요.</div>
         <input type="text" id="note-${m}" placeholder="예) 7/14~7/18만 가능, 특정 날짜 제외 등" style="margin-top:8px;">
       </div>
     </div>`;
@@ -376,14 +383,15 @@ function buildMonthPanel(m) {
   buildGrid(m);
 }
 
-let regionCount = {7:0, 8:0, 9:0, 10:0};
+let regionCount = {7:0, 8:0, 9:0, 10:0, 11:0};
 
 // 월별 날짜 범위 (달력에 표시할 min/max)
 const MONTH_RANGES = {
   7:  { min: '2026-07-01', max: '2026-07-31' },
   8:  { min: '2026-08-01', max: '2026-08-31' },
   9:  { min: '2026-09-01', max: '2026-09-30' },
-  10: { min: '2026-10-01', max: '2026-10-31' }
+  10: { min: '2026-10-01', max: '2026-10-31' },
+  11: { min: '2026-11-01', max: '2026-11-30' }
 };
 
 function addRegion(m) {
@@ -418,12 +426,12 @@ function addRegion(m) {
         <div>
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">시작일</div>
           <input type="date" id="date-start-${m}-${idx}" min="${range.min}" max="${range.max}"
-            style="width:100%;" onchange="validateDateRange(${m},${idx})">
+            style="width:100%;height:34px;padding:6px 8px;" onchange="validateDateRange(${m},${idx})">
         </div>
         <div>
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">종료일</div>
           <input type="date" id="date-end-${m}-${idx}" min="${range.min}" max="${range.max}"
-            style="width:100%;" onchange="validateDateRange(${m},${idx})">
+            style="width:100%;height:34px;padding:6px 8px;" onchange="validateDateRange(${m},${idx})">
         </div>
       </div>
       <div id="date-err-${m}-${idx}" style="font-size:11px;color:var(--error);margin-top:4px;display:none;">
@@ -621,19 +629,52 @@ function validate() {
   markErrOnly('err-car',!document.querySelector('input[name="car"]:checked'));
   markErr('addr-search-input','err-addr',!document.getElementById('addr-full').value.trim());
 
-  // 일정: 4개월 중 최소 1개월 이상 체크되어야 함
-  let hasActiveMonth = false;
+  // Every month from July to November must be answered.
   MONTHS.forEach(m => {
     const unavail = document.getElementById(`unavail-${m}`).checked;
+    const monthWarnId = `month-warn-${m}`;
+    const oldMonthWarn = document.getElementById(monthWarnId);
+    if(oldMonthWarn) oldMonthWarn.remove();
+
     if(!unavail) {
-      hasActiveMonth = true;
+      let monthOk = true;
       // 지역 선택 확인 (첫번째 블록)
       const sido1 = document.getElementById(`sido-${m}-1`);
       if(sido1 && !sido1.value) {
         sido1.classList.add('error-field');
         if(!firstErrEl) firstErrEl = sido1;
         ok = false;
+        monthOk = false;
+      } else if(sido1) {
+        sido1.classList.remove('error-field');
       }
+
+      const sigungu1 = document.getElementById(`sigungu-${m}-1`);
+      if(sigungu1 && !sigungu1.value) {
+        sigungu1.classList.add('error-field');
+        if(!firstErrEl) firstErrEl = sigungu1;
+        ok = false;
+        monthOk = false;
+      } else if(sigungu1) {
+        sigungu1.classList.remove('error-field');
+      }
+
+      const start1 = document.getElementById(`date-start-${m}-1`);
+      const end1 = document.getElementById(`date-end-${m}-1`);
+      const dateErr = document.getElementById(`date-err-${m}-1`);
+      const invalidDate = !start1?.value || !end1?.value || end1.value < start1.value;
+      if(invalidDate) {
+        start1?.classList.add('error-field');
+        end1?.classList.add('error-field');
+        if(dateErr) dateErr.style.display = 'block';
+        if(!firstErrEl) firstErrEl = start1 || end1 || dateErr;
+        ok = false;
+        monthOk = false;
+      } else {
+        start1.classList.remove('error-field');
+        end1.classList.remove('error-field');
+      }
+
       // 요일 선택 확인
       let allDaysFilled = true;
       DAYS.forEach(day => {
@@ -653,12 +694,23 @@ function validate() {
         const w = document.getElementById(`sched-warn-${m}`);
         if(w) w.remove();
       }
+
+      if(!monthOk) {
+        const panel = document.getElementById(`panel-${m}`);
+        if(panel && !document.getElementById(monthWarnId)) {
+          const warn = document.createElement('div');
+          warn.id = monthWarnId;
+          warn.className = 'field-error show';
+          warn.style.marginBottom = '8px';
+          warn.textContent = `${m}월 활동 가능 여부를 빠짐없이 입력해 주세요.`;
+          panel.insertBefore(warn, panel.firstChild);
+        }
+      }
+    } else {
+      const w = document.getElementById(`sched-warn-${m}`);
+      if(w) w.remove();
     }
   });
-  if(!hasActiveMonth) {
-    alert('최소 1개월 이상 활동 가능한 기간을 선택해 주세요.');
-    ok=false;
-  }
 
   markErrOnly('err-target', document.querySelectorAll('input[name="target"]:checked').length===0);
   markErrOnly('err-maker',!document.querySelector('input[name="maker"]:checked'));

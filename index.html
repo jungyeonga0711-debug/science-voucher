@@ -54,7 +54,6 @@
   .addr-item:hover{background:#eef6f1;}
   .addr-item .road{font-weight:500;color:var(--text);}
   .addr-item .jibun{font-size:11.5px;color:var(--text-muted);}
-  .addr-detail{margin-top:6px;}
   /* 월별 */
   .month-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
   .month-tab{padding:7px 18px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:13px;font-weight:500;cursor:pointer;color:var(--text-muted);transition:all .15s;}
@@ -75,6 +74,13 @@
   .schedule-grid td label{display:flex;align-items:center;justify-content:center;padding:9px 4px;cursor:pointer;width:100%;height:100%;transition:background .1s;font-size:12px;color:var(--text-muted);gap:3px;}
   .schedule-grid td label:has(input:checked){background:#eef6f1;color:var(--primary);font-weight:600;}
   .schedule-grid td input[type="radio"]{width:13px;height:13px;accent-color:var(--primary);}
+  .schedule-head{display:block;margin-top:14px;}
+  .schedule-head .field-label{white-space:nowrap;}
+  .schedule-tools{display:flex;flex-wrap:nowrap;gap:5px;justify-content:flex-start;overflow-x:auto;padding-bottom:2px;margin-top:8px;}
+  .schedule-preset{border:1px solid var(--primary-light);background:#fff;color:var(--primary);border-radius:5px;padding:4px 7px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;line-height:1.2;}
+  .schedule-preset:hover{background:#eef6f1;}
+  .schedule-content{transition:opacity .2s;}
+  .schedule-content.disabled{opacity:.35;pointer-events:none;}
   .sat{color:#2563eb;}.sun{color:#dc2626;}
   .holiday-check{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:13px;cursor:pointer;color:var(--text-muted);}
   .holiday-check input{accent-color:var(--accent);width:15px;height:15px;}
@@ -207,13 +213,12 @@
         <div class="field-error" id="err-car">이동 수단을 선택해 주세요.</div>
       </div>
       <div class="field">
-        <label class="field-label">주 활동 지역 <span class="req">*</span> <span class="hint">수혜기관과의 거리를 고려하여 배정하오니 되도록 정확한 주소를 입력해 주시기 바랍니다. (동·호수 입력x)</span></label>
+        <label class="field-label">주 활동 지역 <span class="req">*</span> <span class="hint">수혜기관과의 거리를 고려하여 배정하오니 정확한 주소를 입력해 주시기 바랍니다. (상세주소 입력 X)</span></label>
         <div class="addr-wrap">
           <input type="text" id="addr-search-input" placeholder="도로명·건물명으로 검색" readonly style="cursor:pointer;background:#f9f9f9;" onclick="openAddrSearch()">
           <button type="button" class="addr-search-btn" onclick="openAddrSearch()">주소 검색</button>
         </div>
         <div class="addr-result" id="addr-result"></div>
-        <input type="text" id="addr-detail" class="addr-detail" placeholder="상세 주소 입력 (동·호수 등)" style="display:none;margin-top:6px;">
         <input type="hidden" id="addr-full">
         <div class="field-error" id="err-addr">주소를 검색 후 선택해 주세요.</div>
       </div>
@@ -354,6 +359,17 @@ const REGIONS = {
 const MONTHS=[7,8,9,10,11];
 const DAYS=["월","화","수","목","금","토","일"];
 const TIMES=["오전","오후","종일","불가"];
+const HOLIDAYS_2026 = {
+  '2026-07-17': '제헌절',
+  '2026-08-15': '광복절',
+  '2026-08-17': '광복절 대체공휴일',
+  '2026-09-24': '추석 연휴',
+  '2026-09-25': '추석',
+  '2026-09-26': '추석 연휴',
+  '2026-10-03': '개천절',
+  '2026-10-05': '개천절 대체공휴일',
+  '2026-10-09': '한글날'
+};
 
 // ========== 월별 패널 초기화 ==========
 function buildMonthPanel(m) {
@@ -368,19 +384,8 @@ function buildMonthPanel(m) {
       <button type="button" class="add-region-btn" onclick="addRegion(${m})">
         ＋ 지역 추가 &nbsp;<span style="font-size:11px;font-weight:400;color:var(--text-muted);">(같은 달에 활동 지역이 여러 곳인 경우)</span>
       </button>
-      <div style="margin-top:4px;">
-        <label class="field-label">월별 활동 가능 요일 · 시간대 <span class="req">*</span></label>
-        <div id="grid-${m}"></div>
-        <label class="holiday-check">
-          <input type="checkbox" id="holiday-${m}">
-          명절·공휴일 제외 (해당 날짜는 활동 불가)
-        </label>
-        <div class="schedule-note">※ 특정 기간만 가능하거나 기타 전달사항이 있으면 적어주세요.</div>
-        <input type="text" id="note-${m}" placeholder="예) 7/14~7/18만 가능, 특정 날짜 제외 등" style="margin-top:8px;">
-      </div>
     </div>`;
   addRegion(m);
-  buildGrid(m);
 }
 
 let regionCount = {7:0, 8:0, 9:0, 10:0, 11:0};
@@ -438,8 +443,33 @@ function addRegion(m) {
         종료일은 시작일 이후여야 합니다.
       </div>
       <div id="date-preview-${m}-${idx}" style="font-size:12px;color:var(--primary);font-weight:500;margin-top:6px;display:none;"></div>
+    </div>
+    <div class="schedule-head">
+      <label class="field-label" style="margin-bottom:0;">위 지역 활동 가능 일정 <span class="req">*</span></label>
+      <div class="schedule-tools" aria-label="빠른 선택">
+        <button type="button" class="schedule-preset" onclick="applySchedulePreset(${m},${idx},'weekday','오전')">평일 오전</button>
+        <button type="button" class="schedule-preset" onclick="applySchedulePreset(${m},${idx},'weekday','오후')">평일 오후</button>
+        <button type="button" class="schedule-preset" onclick="applySchedulePreset(${m},${idx},'weekend','오전')">주말 오전</button>
+        <button type="button" class="schedule-preset" onclick="applySchedulePreset(${m},${idx},'weekend','오후')">주말 오후</button>
+        <button type="button" class="schedule-preset" onclick="applySchedulePreset(${m},${idx},'weekday','종일')">평일 종일</button>
+        <button type="button" class="schedule-preset" onclick="applySchedulePreset(${m},${idx},'weekend','종일')">주말 종일</button>
+        <button type="button" class="schedule-preset" onclick="applySchedulePreset(${m},${idx},'all','오전')">매일 오전</button>
+        <button type="button" class="schedule-preset" onclick="applySchedulePreset(${m},${idx},'all','오후')">매일 오후</button>
+        <button type="button" class="schedule-preset" onclick="applySchedulePreset(${m},${idx},'all','종일')">매일 종일</button>
+        <button type="button" class="schedule-preset" onclick="applySchedulePreset(${m},${idx},'all','불가')">불가</button>
+      </div>
+    </div>
+    <div class="schedule-content" id="schedule-content-${m}-${idx}">
+      <div id="grid-${m}-${idx}"></div>
+      <label class="holiday-check">
+        <input type="checkbox" id="holiday-${m}-${idx}">
+        명절·공휴일 제외 (해당 날짜는 활동 불가)
+      </label>
+      <div class="schedule-note">※ 특정 기간만 가능하거나 기타 전달사항이 있으면 적어주세요.</div>
+      <input type="text" id="note-${m}-${idx}" placeholder="예) 특정 요일만 가능, 특정 날짜 제외 등" style="margin-top:8px;">
     </div>`;
   wrap.appendChild(block);
+  buildGrid(m, idx);
 }
 
 function validateDateRange(m, idx) {
@@ -483,8 +513,8 @@ function updateSigungu(m, idx) {
   });
 }
 
-function buildGrid(m) {
-  const container = document.getElementById(`grid-${m}`);
+function buildGrid(m, idx) {
+  const container = document.getElementById(`grid-${m}-${idx}`);
   let html = `<table class="schedule-grid"><thead><tr><th>요일</th>`;
   TIMES.forEach(t => { html += `<th>${t}</th>`; });
   html += `</tr></thead><tbody>`;
@@ -492,12 +522,29 @@ function buildGrid(m) {
     const cls = di===5?'sat':di===6?'sun':'';
     html += `<tr><td><span style="font-weight:600;" class="${cls}">${day}</span></td>`;
     TIMES.forEach(time => {
-      html += `<td><label><input type="radio" name="sched-${m}-${day}" value="${time}"></label></td>`;
+      html += `<td><label><input type="radio" name="sched-${m}-${idx}-${day}" value="${time}"></label></td>`;
     });
     html += `</tr>`;
   });
   html += `</tbody></table>`;
   container.innerHTML = html;
+}
+
+function applySchedulePreset(m, idx, scope, time) {
+  const scheduleContent = document.getElementById(`schedule-content-${m}-${idx}`);
+  DAYS.forEach((day, di) => {
+    const isWeekend = di >= 5;
+    const shouldApply =
+      scope === 'all' ||
+      (scope === 'weekday' && !isWeekend) ||
+      (scope === 'weekend' && isWeekend);
+    const value = shouldApply ? time : '불가';
+    const input = document.querySelector(`input[name="sched-${m}-${idx}-${day}"][value="${value}"]`);
+    if(input) input.checked = true;
+  });
+  scheduleContent?.classList.toggle('disabled', scope === 'all' && time === '불가');
+  const warn = document.getElementById(`sched-warn-${m}-${idx}`);
+  if(warn) warn.remove();
 }
 
 function toggleMonth(m) {
@@ -569,8 +616,6 @@ async function searchAddr() {
 function selectAddr(road, jibun) {
   document.getElementById('addr-search-input').value = road;
   document.getElementById('addr-full').value = road;
-  document.getElementById('addr-detail').style.display='block';
-  document.getElementById('addr-detail').focus();
   document.getElementById('err-addr').classList.remove('show');
   document.getElementById('addr-search-input').classList.remove('error-field');
   closeAddrModal();
@@ -598,36 +643,40 @@ function showErrOnly(errId, show) {
 
 function validate() {
   let ok=true, firstErrEl=null;
+  const missingFields = [];
 
-  function markErr(fieldId, errId, cond) {
-    setErr(fieldId, errId, cond);
-    if(cond && !firstErrEl) firstErrEl = document.getElementById(errId)||document.getElementById(fieldId);
-    if(cond) ok=false;
+  function addMissing(label, el) {
+    if(!missingFields.includes(label)) missingFields.push(label);
+    if(!firstErrEl && el) firstErrEl = el;
+    ok = false;
   }
-  function markErrOnly(errId, cond) {
+
+  function markErr(fieldId, errId, cond, label) {
+    setErr(fieldId, errId, cond);
+    if(cond) addMissing(label, document.getElementById(errId)||document.getElementById(fieldId));
+  }
+  function markErrOnly(errId, cond, label) {
     showErrOnly(errId, cond);
-    if(cond && !firstErrEl) firstErrEl = document.getElementById(errId);
-    if(cond) ok=false;
+    if(cond) addMissing(label, document.getElementById(errId));
   }
 
   // 결격사유 동의
   if(!document.getElementById('agree-check').checked) {
-    alert('결격사유 확인 및 동의가 필요합니다.');
-    ok=false;
+    addMissing('결격사유 확인 및 동의', document.getElementById('agree-check'));
   }
 
-  markErr('name','err-name',!document.getElementById('name').value.trim());
-  markErrOnly('err-gender',!document.querySelector('input[name="gender"]:checked'));
+  markErr('name','err-name',!document.getElementById('name').value.trim(), '이름');
+  markErrOnly('err-gender',!document.querySelector('input[name="gender"]:checked'), '성별');
   const phone=document.getElementById('phone').value;
-  markErr('phone','err-phone',!/^010-\d{4}-\d{4}$/.test(phone));
+  markErr('phone','err-phone',!/^010-\d{4}-\d{4}$/.test(phone), '연락처');
   const email=document.getElementById('email').value.trim();
-  markErr('email','err-email',!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
-  markErr('school','err-school',!document.getElementById('school').value.trim());
-  markErr('grade','err-grade',!document.getElementById('grade').value);
-  markErr('major-dept','err-major-dept',!document.getElementById('major-dept').value);
-  markErr('major-name','err-major-name',!document.getElementById('major-name').value.trim());
-  markErrOnly('err-car',!document.querySelector('input[name="car"]:checked'));
-  markErr('addr-search-input','err-addr',!document.getElementById('addr-full').value.trim());
+  markErr('email','err-email',!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email), '이메일');
+  markErr('school','err-school',!document.getElementById('school').value.trim(), '학교명');
+  markErr('grade','err-grade',!document.getElementById('grade').value, '학년');
+  markErr('major-dept','err-major-dept',!document.getElementById('major-dept').value, '전공 계열');
+  markErr('major-name','err-major-name',!document.getElementById('major-name').value.trim(), '학과명');
+  markErrOnly('err-car',!document.querySelector('input[name="car"]:checked'), '이동 수단');
+  markErr('addr-search-input','err-addr',!document.getElementById('addr-full').value.trim(), '주 활동 지역 주소');
 
   // Every month from July to November must be answered.
   MONTHS.forEach(m => {
@@ -638,62 +687,62 @@ function validate() {
 
     if(!unavail) {
       let monthOk = true;
-      // 지역 선택 확인 (첫번째 블록)
-      const sido1 = document.getElementById(`sido-${m}-1`);
-      if(sido1 && !sido1.value) {
-        sido1.classList.add('error-field');
-        if(!firstErrEl) firstErrEl = sido1;
-        ok = false;
-        monthOk = false;
-      } else if(sido1) {
-        sido1.classList.remove('error-field');
-      }
+      document.querySelectorAll(`[id^="region-block-${m}-"]`).forEach(block => {
+        const idx = block.id.split('-').pop();
+        const sido = document.getElementById(`sido-${m}-${idx}`);
+        const sigungu = document.getElementById(`sigungu-${m}-${idx}`);
+        const start = document.getElementById(`date-start-${m}-${idx}`);
+        const end = document.getElementById(`date-end-${m}-${idx}`);
+        const dateErr = document.getElementById(`date-err-${m}-${idx}`);
 
-      const sigungu1 = document.getElementById(`sigungu-${m}-1`);
-      if(sigungu1 && !sigungu1.value) {
-        sigungu1.classList.add('error-field');
-        if(!firstErrEl) firstErrEl = sigungu1;
-        ok = false;
-        monthOk = false;
-      } else if(sigungu1) {
-        sigungu1.classList.remove('error-field');
-      }
-
-      const start1 = document.getElementById(`date-start-${m}-1`);
-      const end1 = document.getElementById(`date-end-${m}-1`);
-      const dateErr = document.getElementById(`date-err-${m}-1`);
-      const invalidDate = !start1?.value || !end1?.value || end1.value < start1.value;
-      if(invalidDate) {
-        start1?.classList.add('error-field');
-        end1?.classList.add('error-field');
-        if(dateErr) dateErr.style.display = 'block';
-        if(!firstErrEl) firstErrEl = start1 || end1 || dateErr;
-        ok = false;
-        monthOk = false;
-      } else {
-        start1.classList.remove('error-field');
-        end1.classList.remove('error-field');
-      }
-
-      // 요일 선택 확인
-      let allDaysFilled = true;
-      DAYS.forEach(day => {
-        if(!document.querySelector(`input[name="sched-${m}-${day}"]:checked`)) allDaysFilled=false;
-      });
-      if(!allDaysFilled) {
-        const gridEl = document.getElementById(`grid-${m}`);
-        if(gridEl && !firstErrEl) firstErrEl = gridEl;
-        ok = false;
-        if(!document.getElementById(`sched-warn-${m}`)) {
-          const warn = document.createElement('div');
-          warn.id = `sched-warn-${m}`; warn.className='field-error show';
-          warn.textContent='모든 요일에 대해 가능 여부를 선택해 주세요.';
-          gridEl.parentNode.insertBefore(warn, gridEl.nextSibling);
+        if(sido && !sido.value) {
+          sido.classList.add('error-field');
+          addMissing(`${m}월 활동 지역 ${idx} 시·도`, sido);
+          monthOk = false;
+        } else if(sido) {
+          sido.classList.remove('error-field');
         }
-      } else {
-        const w = document.getElementById(`sched-warn-${m}`);
-        if(w) w.remove();
-      }
+
+        if(sigungu && !sigungu.value) {
+          sigungu.classList.add('error-field');
+          addMissing(`${m}월 활동 지역 ${idx} 시·군·구`, sigungu);
+          monthOk = false;
+        } else if(sigungu) {
+          sigungu.classList.remove('error-field');
+        }
+
+        const invalidDate = !start?.value || !end?.value || end.value < start.value;
+        if(invalidDate) {
+          start?.classList.add('error-field');
+          end?.classList.add('error-field');
+          if(dateErr) dateErr.style.display = 'block';
+          addMissing(`${m}월 활동 지역 ${idx} 활동 가능 기간`, start || end || dateErr);
+          monthOk = false;
+        } else {
+          start.classList.remove('error-field');
+          end.classList.remove('error-field');
+        }
+
+        let allDaysFilled = true;
+        DAYS.forEach(day => {
+          if(!document.querySelector(`input[name="sched-${m}-${idx}-${day}"]:checked`)) allDaysFilled=false;
+        });
+        const gridEl = document.getElementById(`grid-${m}-${idx}`);
+        const warnId = `sched-warn-${m}-${idx}`;
+        if(!allDaysFilled) {
+          addMissing(`${m}월 활동 지역 ${idx} 요일·시간대`, gridEl);
+          monthOk = false;
+          if(gridEl && !document.getElementById(warnId)) {
+            const warn = document.createElement('div');
+            warn.id = warnId; warn.className='field-error show';
+            warn.textContent='이 지역의 모든 요일에 대해 가능 여부를 선택해 주세요.';
+            gridEl.parentNode.insertBefore(warn, gridEl.nextSibling);
+          }
+        } else {
+          const w = document.getElementById(warnId);
+          if(w) w.remove();
+        }
+      });
 
       if(!monthOk) {
         const panel = document.getElementById(`panel-${m}`);
@@ -707,22 +756,71 @@ function validate() {
         }
       }
     } else {
-      const w = document.getElementById(`sched-warn-${m}`);
-      if(w) w.remove();
+      document.querySelectorAll(`[id^="sched-warn-${m}-"]`).forEach(w => w.remove());
     }
   });
 
-  markErrOnly('err-target', document.querySelectorAll('input[name="target"]:checked').length===0);
-  markErrOnly('err-maker',!document.querySelector('input[name="maker"]:checked'));
+  markErrOnly('err-target', document.querySelectorAll('input[name="target"]:checked').length===0, '교육 대상 경험');
+  markErrOnly('err-maker',!document.querySelector('input[name="maker"]:checked'), '과학·메이커 교구 활용 경험');
 
   // 개인정보 동의
-  markErrOnly('err-privacy', !document.getElementById('privacy-check').checked);
+  markErrOnly('err-privacy', !document.getElementById('privacy-check').checked, '개인정보 수집·이용 동의');
 
   if(firstErrEl) setTimeout(()=>firstErrEl.scrollIntoView({behavior:'smooth',block:'center'}),100);
+  if(!ok) {
+    alert(`아래 항목을 입력하거나 선택해 주세요.\n\n- ${missingFields.join('\n- ')}`);
+  }
   return ok;
 }
 
 // ========== 데이터 수집 ==========
+function getMonthDates(m) {
+  const dates = [];
+  const lastDay = new Date(2026, m, 0).getDate();
+  for(let day=1; day<=lastDay; day++) {
+    const mm = String(m).padStart(2,'0');
+    const dd = String(day).padStart(2,'0');
+    dates.push(`2026-${mm}-${dd}`);
+  }
+  return dates;
+}
+
+function formatDateColumn(dateStr) {
+  const [, mm, dd] = dateStr.split('-');
+  const jsDay = new Date(`${dateStr}T00:00:00`).getDay();
+  const dayName = DAYS[jsDay === 0 ? 6 : jsDay - 1];
+  const holidayName = HOLIDAYS_2026[dateStr];
+  return `${Number(mm)}. ${Number(dd)}. (${dayName})${holidayName ? `\n${holidayName}` : ''}`;
+}
+
+function formatDateLabel(dateStr) {
+  const [, mm, dd] = dateStr.split('-');
+  const jsDay = new Date(`${dateStr}T00:00:00`).getDay();
+  const dayName = DAYS[jsDay === 0 ? 6 : jsDay - 1];
+  return `${mm}-${dd}(${dayName})`;
+}
+
+function getScheduleForDate(m, dateStr) {
+  const entries = [];
+  document.querySelectorAll(`[id^="sido-${m}-"]`).forEach(sidoEl => {
+    const idx = sidoEl.id.split('-').pop();
+    const sido = sidoEl.value;
+    const sigungu = document.getElementById(`sigungu-${m}-${idx}`)?.value || '';
+    const dateStart = document.getElementById(`date-start-${m}-${idx}`)?.value || '';
+    const dateEnd = document.getElementById(`date-end-${m}-${idx}`)?.value || '';
+    if(!sido || !dateStart || !dateEnd || dateStr < dateStart || dateStr > dateEnd) return;
+
+    const jsDay = new Date(`${dateStr}T00:00:00`).getDay();
+    const day = DAYS[jsDay === 0 ? 6 : jsDay - 1];
+    const checked = document.querySelector(`input[name="sched-${m}-${idx}-${day}"]:checked`);
+    if(!checked || checked.value === '불가') return;
+
+    const regionName = sido + (sigungu ? ' ' + sigungu : '');
+    entries.push(`${checked.value}\n${regionName}`);
+  });
+  return entries.length ? entries.join('\n') : '불가';
+}
+
 function collectData() {
   const sched = {};
   MONTHS.forEach(m => {
@@ -730,11 +828,19 @@ function collectData() {
     sched[`${m}월_활동불가`] = unavail ? 'Y' : 'N';
     if(unavail) {
       sched[`${m}월_지역`]='-';
-      DAYS.forEach(d=>{ sched[`${m}월_${d}`]='-'; });
+      getMonthDates(m).forEach(dateStr => {
+        sched[formatDateColumn(dateStr)] = '불가';
+      });
+      DAYS.forEach(day => {
+        const values = getMonthDates(m)
+          .filter(dateStr => formatDateLabel(dateStr).endsWith(`(${day})`))
+          .map(dateStr => `${formatDateLabel(dateStr)}:불가`);
+        sched[`${m}월_${day}`] = values.join('; ');
+      });
+      sched[`${m}월_일자별일정`] = getMonthDates(m).map(dateStr => `${formatDateLabel(dateStr)}:불가`).join('; ');
       sched[`${m}월_명절공휴일제외`]='-';
       sched[`${m}월_비고`]='-';
     } else {
-      // 지역 + 날짜 수집
       const regions = [];
       document.querySelectorAll(`[id^="sido-${m}-"]`).forEach(sidoEl => {
         const parts = sidoEl.id.split('-');
@@ -746,20 +852,38 @@ function collectData() {
         if(sido) {
           const regionName = sido + (sigungu ? ' ' + sigungu : '');
           const dateRange = dateStart && dateEnd ? `(${dateStart.replace('2026-','')}~${dateEnd.replace('2026-','')})` : '(날짜미정)';
-          regions.push(regionName + ' ' + dateRange);
+          const daySummary = DAYS.map(day => {
+            const checked = document.querySelector(`input[name="sched-${m}-${idx}-${day}"]:checked`);
+            return `${day}:${checked ? checked.value : '미선택'}`;
+          }).join(', ');
+          const holiday = document.getElementById(`holiday-${m}-${idx}`)?.checked ? '명절공휴일 제외' : '명절공휴일 가능';
+          const note = document.getElementById(`note-${m}-${idx}`)?.value.trim();
+          regions.push(`${regionName} ${dateRange} [${daySummary}] [${holiday}]${note ? ` 비고:${note}` : ''}`);
         }
       });
       sched[`${m}월_지역`] = regions.join(' / ') || '미선택';
-      DAYS.forEach(day => {
-        const checked = document.querySelector(`input[name="sched-${m}-${day}"]:checked`);
-        sched[`${m}월_${day}`] = checked ? checked.value : '미선택';
+      getMonthDates(m).forEach(dateStr => {
+        sched[formatDateColumn(dateStr)] = getScheduleForDate(m, dateStr);
       });
-      sched[`${m}월_명절공휴일제외`] = document.getElementById(`holiday-${m}`).checked ? 'Y' : 'N';
-      sched[`${m}월_비고`] = document.getElementById(`note-${m}`)?.value.trim() || '';
+      DAYS.forEach(day => {
+        const values = getMonthDates(m)
+          .filter(dateStr => formatDateLabel(dateStr).endsWith(`(${day})`))
+          .map(dateStr => `${formatDateLabel(dateStr)}:${getScheduleForDate(m, dateStr)}`);
+        sched[`${m}월_${day}`] = values.join('; ');
+      });
+      const dateDetail = getMonthDates(m)
+        .map(dateStr => `${formatDateLabel(dateStr)}:${getScheduleForDate(m, dateStr)}`)
+        .join('; ');
+      sched[`${m}월_일자별일정`] = dateDetail;
+      sched[`${m}월_명절공휴일제외`] = document.querySelectorAll(`[id^="holiday-${m}-"]:checked`).length ? 'Y' : 'N';
+      const notes = [...document.querySelectorAll(`[id^="note-${m}-"]`)].map((el, i) => {
+        const note = el.value.trim();
+        return note ? `지역${i+1}:${note}` : '';
+      }).filter(Boolean).join(' / ');
+      sched[`${m}월_비고`] = [notes, `일자별 ${dateDetail}`].filter(Boolean).join(' / ');
     }
   });
   const addrBase = document.getElementById('addr-full').value.trim();
-  const addrDetail = document.getElementById('addr-detail').value.trim();
   return {
     제출일시: new Date().toLocaleString('ko-KR'),
     이름: document.getElementById('name').value.trim(),
@@ -771,7 +895,7 @@ function collectData() {
     전공계열: document.getElementById('major-dept').value,
     학과명: document.getElementById('major-name').value.trim(),
     자차여부: document.querySelector('input[name="car"]:checked')?.value||'',
-    교구수령주소: addrBase + (addrDetail ? ' ' + addrDetail : ''),
+    교구수령주소: addrBase,
     교육대상경험: [...document.querySelectorAll('input[name="target"]:checked')].map(i=>i.value).join(', '),
     메이커교구경험: document.querySelector('input[name="maker"]:checked')?.value||'',
     지원동기: document.getElementById('motivation').value.trim(),

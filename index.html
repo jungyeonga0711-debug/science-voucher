@@ -278,12 +278,19 @@
       </div>
       <div class="field">
         <label class="field-label">과학·메이커 교구 활용 경험 <span class="req">*</span></label>
-        <div class="radio-group" id="maker-group">
-          <label><input type="radio" name="maker" value="많음 (관련 수업·활동 다수)"> 많음</label>
-          <label><input type="radio" name="maker" value="보통 (키트 조립 등 일부 경험)"> 보통</label>
-          <label><input type="radio" name="maker" value="없음"> 없음</label>
+        <div class="check-grid" id="maker-tool-group">
+          <label><input type="checkbox" name="maker-tool" value="아두이노"> 아두이노</label>
+          <label><input type="checkbox" name="maker-tool" value="엔트리"> 엔트리</label>
+          <label><input type="checkbox" name="maker-tool" value="마이크로비트"> 마이크로비트</label>
+          <label><input type="checkbox" name="maker-tool" value="라즈베리파이"> 라즈베리파이</label>
+          <label><input type="checkbox" name="maker-tool" value="기타 과학교구"> 기타 과학교구</label>
         </div>
-        <div class="field-error" id="err-maker">경험을 선택해 주세요.</div>
+        <div class="check-group" id="maker-level-group" style="margin-top:8px;">
+          <label><input type="checkbox" name="maker-level" value="많음"> 많음</label>
+          <label><input type="checkbox" name="maker-level" value="보통"> 보통</label>
+          <label><input type="checkbox" name="maker-level" value="없음"> 없음</label>
+        </div>
+        <div class="field-error" id="err-maker">활용 가능한 교구와 경험 정도를 하나 이상 선택해 주세요.</div>
       </div>
       <div class="field">
         <label class="field-label">지원 동기 <span class="hint">선택, 50자 이내</span></label>
@@ -862,7 +869,12 @@ function validate() {
   });
 
   markErrOnly('err-target', document.querySelectorAll('input[name="target"]:checked').length===0, '교육 대상 경험');
-  markErrOnly('err-maker',!document.querySelector('input[name="maker"]:checked'), '과학·메이커 교구 활용 경험');
+  markErrOnly(
+    'err-maker',
+    document.querySelectorAll('input[name="maker-tool"]:checked').length===0 ||
+    document.querySelectorAll('input[name="maker-level"]:checked').length===0,
+    '과학·메이커 교구 활용 경험'
+  );
 
   // 개인정보 동의
   markErrOnly('err-privacy', !document.getElementById('privacy-check').checked, '개인정보 수집·이용 동의');
@@ -1002,8 +1014,11 @@ function collectData() {
     자차여부: document.querySelector('input[name="car"]:checked')?.value||'',
     교구수령주소: addrBase,
     교육대상경험: [...document.querySelectorAll('input[name="target"]:checked')].map(i=>i.value).join(', '),
-    메이커교구경험: document.querySelector('input[name="maker"]:checked')?.value||'',
-    지원동기: document.getElementById('motivation').value.trim(),
+    메이커교구경험: [
+      [...document.querySelectorAll('input[name="maker-tool"]:checked')].map(i=>i.value).join(', '),
+      [...document.querySelectorAll('input[name="maker-level"]:checked')].map(i=>i.value).join(', ')
+    ].filter(Boolean).join(' / '),
+    기타 이력, 지원동기 등: document.getElementById('motivation').value.trim(),
     ...sched
   };
 }

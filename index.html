@@ -91,6 +91,17 @@
   .month-unavail.checked{color:var(--accent);font-weight:500;}
   .month-content{transition:opacity .2s;}
   .month-content.disabled{opacity:.35;pointer-events:none;}
+  .range-calendar{display:none;background:#fff;border:1.5px solid var(--primary-light);border-radius:8px;padding:12px;margin-top:8px;box-shadow:0 4px 16px rgba(0,0,0,.08);}
+  .range-calendar.show{display:block;}
+  .range-calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:13px;font-weight:700;color:var(--primary);}
+  .range-calendar-help{font-size:11px;font-weight:400;color:var(--text-muted);}
+  .range-calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .range-calendar-dayname{font-size:11px;text-align:center;color:var(--text-muted);font-weight:600;padding:3px 0;}
+  .range-calendar-date{border:1px solid var(--border);background:#fff;border-radius:5px;min-height:32px;font-size:12px;color:var(--text);cursor:pointer;font-family:inherit;}
+  .range-calendar-date:hover{border-color:var(--primary-light);background:#eef6f1;}
+  .range-calendar-date.selected{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:700;}
+  .range-calendar-date.in-range{background:#eef6f1;border-color:#c9ead8;color:var(--primary);font-weight:600;}
+  .range-calendar-date.placeholder{visibility:hidden;pointer-events:none;}
   textarea{resize:vertical;min-height:80px;line-height:1.6;}
   .char-count{font-size:11px;color:var(--text-muted);text-align:right;margin-top:4px;}
   .char-count.over{color:var(--error);}
@@ -114,7 +125,7 @@
   .loading-overlay p{color:#fff;font-size:14px;font-weight:500;}
   @keyframes spin{to{transform:rotate(360deg);}}
   select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
-  @media(max-width:480px){.row-2,.region-row{grid-template-columns:1fr;}.check-grid{grid-template-columns:repeat(2,1fr);}.schedule-grid th,.schedule-grid td label{font-size:11px;padding:7px 2px;}.header h1{font-size:18px;}}
+  @media(max-width:480px){.row-2,.region-row{grid-template-columns:1fr;}.check-grid{grid-template-columns:repeat(2,1fr);}.range-calendar-date{min-height:36px;}.schedule-grid th,.schedule-grid td label{font-size:11px;padding:7px 2px;}.header h1{font-size:18px;}}
 </style>
 </head>
 <body>
@@ -430,15 +441,16 @@ function addRegion(m) {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center;">
         <div>
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">시작일</div>
-          <input type="date" id="date-start-${m}-${idx}" min="${range.min}" max="${range.max}"
-            style="width:100%;height:34px;padding:6px 8px;" onchange="validateDateRange(${m},${idx})">
+          <input type="text" id="date-start-${m}-${idx}" placeholder="날짜 선택" readonly
+            style="width:100%;height:34px;padding:6px 8px;cursor:pointer;background:#fff;" onclick="openDateRangePicker(${m},${idx})">
         </div>
         <div>
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">종료일</div>
-          <input type="date" id="date-end-${m}-${idx}" min="${range.min}" max="${range.max}"
-            style="width:100%;height:34px;padding:6px 8px;" onchange="validateDateRange(${m},${idx})">
+          <input type="text" id="date-end-${m}-${idx}" placeholder="날짜 선택" readonly
+            style="width:100%;height:34px;padding:6px 8px;cursor:pointer;background:#fff;" onclick="openDateRangePicker(${m},${idx})">
         </div>
       </div>
+      <div id="date-picker-${m}-${idx}" class="range-calendar"></div>
       <div id="date-err-${m}-${idx}" style="font-size:11px;color:var(--error);margin-top:4px;display:none;">
         해당 월에 맞는 날짜를 다시 선택해 주세요.
       </div>
@@ -494,6 +506,73 @@ function validateDateRange(m, idx) {
     errEl.style.display = 'none';
     previewEl.style.display = start || end ? 'none' : 'none';
   }
+}
+
+const datePickerState = {};
+
+function openDateRangePicker(m, idx) {
+  const picker = document.getElementById(`date-picker-${m}-${idx}`);
+  if(!picker) return;
+  document.querySelectorAll('.range-calendar.show').forEach(el => {
+    if(el !== picker) el.classList.remove('show');
+  });
+  const start = document.getElementById(`date-start-${m}-${idx}`).value;
+  const end = document.getElementById(`date-end-${m}-${idx}`).value;
+  datePickerState[`${m}-${idx}`] = { selecting: start && !end ? 'end' : 'start' };
+  renderDateRangePicker(m, idx);
+  picker.classList.add('show');
+}
+
+function renderDateRangePicker(m, idx) {
+  const picker = document.getElementById(`date-picker-${m}-${idx}`);
+  const start = document.getElementById(`date-start-${m}-${idx}`).value;
+  const end = document.getElementById(`date-end-${m}-${idx}`).value;
+  const firstDay = new Date(2026, m - 1, 1).getDay();
+  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+  const lastDay = new Date(2026, m, 0).getDate();
+  let html = `
+    <div class="range-calendar-head">
+      <span>${m}월 활동 가능 기간</span>
+      <span class="range-calendar-help">시작일 선택 후 종료일 선택</span>
+    </div>
+    <div class="range-calendar-grid">
+      ${DAYS.map(d => `<div class="range-calendar-dayname">${d}</div>`).join('')}
+  `;
+  for(let i=0; i<startOffset; i++) {
+    html += '<button type="button" class="range-calendar-date placeholder" tabindex="-1"></button>';
+  }
+  for(let day=1; day<=lastDay; day++) {
+    const dateStr = `2026-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const selected = dateStr === start || dateStr === end;
+    const inRange = start && end && dateStr > start && dateStr < end;
+    html += `<button type="button" class="range-calendar-date ${selected ? 'selected' : ''} ${inRange ? 'in-range' : ''}" onclick="selectRangeDate(${m},${idx},'${dateStr}')">${day}</button>`;
+  }
+  html += '</div>';
+  picker.innerHTML = html;
+}
+
+function selectRangeDate(m, idx, dateStr) {
+  const key = `${m}-${idx}`;
+  const startEl = document.getElementById(`date-start-${m}-${idx}`);
+  const endEl = document.getElementById(`date-end-${m}-${idx}`);
+  const state = datePickerState[key] || { selecting: 'start' };
+
+  if(state.selecting === 'start' || !startEl.value || (startEl.value && endEl.value)) {
+    startEl.value = dateStr;
+    endEl.value = '';
+    datePickerState[key] = { selecting: 'end' };
+  } else {
+    if(dateStr < startEl.value) {
+      endEl.value = startEl.value;
+      startEl.value = dateStr;
+    } else {
+      endEl.value = dateStr;
+    }
+    datePickerState[key] = { selecting: 'start' };
+    document.getElementById(`date-picker-${m}-${idx}`)?.classList.remove('show');
+  }
+  validateDateRange(m, idx);
+  renderDateRangePicker(m, idx);
 }
 
 function getDateRangeError(m, start, end) {

@@ -440,7 +440,7 @@ function addRegion(m) {
         </div>
       </div>
       <div id="date-err-${m}-${idx}" style="font-size:11px;color:var(--error);margin-top:4px;display:none;">
-        종료일은 시작일 이후여야 합니다.
+        해당 월에 맞는 날짜를 다시 선택해 주세요.
       </div>
       <div id="date-preview-${m}-${idx}" style="font-size:12px;color:var(--primary);font-weight:500;margin-top:6px;display:none;"></div>
     </div>
@@ -478,7 +478,9 @@ function validateDateRange(m, idx) {
   const errEl = document.getElementById(`date-err-${m}-${idx}`);
   const previewEl = document.getElementById(`date-preview-${m}-${idx}`);
   if (start && end) {
-    if (end < start) {
+    const errorMessage = getDateRangeError(m, start, end);
+    if (errorMessage) {
+      errEl.textContent = errorMessage;
       errEl.style.display = 'block';
       previewEl.style.display = 'none';
     } else {
@@ -492,6 +494,16 @@ function validateDateRange(m, idx) {
     errEl.style.display = 'none';
     previewEl.style.display = start || end ? 'none' : 'none';
   }
+}
+
+function getDateRangeError(m, start, end) {
+  if(!start || !end) return '시작일과 종료일을 모두 선택해 주세요.';
+  const range = MONTH_RANGES[m];
+  if(start < range.min || start > range.max || end < range.min || end > range.max) {
+    return `${m}월 탭에서는 ${m}월 날짜만 선택할 수 있습니다. 해당 월에 맞는 날짜를 다시 선택해 주세요.`;
+  }
+  if(end < start) return '종료일은 시작일 이후여야 합니다.';
+  return '';
 }
 
 function removeRegion(m, idx) {
@@ -711,11 +723,14 @@ function validate() {
           sigungu.classList.remove('error-field');
         }
 
-        const invalidDate = !start?.value || !end?.value || end.value < start.value;
-        if(invalidDate) {
+        const dateErrorMessage = getDateRangeError(m, start?.value, end?.value);
+        if(dateErrorMessage) {
           start?.classList.add('error-field');
           end?.classList.add('error-field');
-          if(dateErr) dateErr.style.display = 'block';
+          if(dateErr) {
+            dateErr.textContent = dateErrorMessage;
+            dateErr.style.display = 'block';
+          }
           addMissing(`${m}월 활동 지역 ${idx} 활동 가능 기간`, start || end || dateErr);
           monthOk = false;
         } else {
@@ -815,10 +830,14 @@ function getScheduleForDate(m, dateStr) {
     const checked = document.querySelector(`input[name="sched-${m}-${idx}-${day}"]:checked`);
     if(!checked || checked.value === '불가') return;
 
-    const regionName = sido + (sigungu ? ' ' + sigungu : '');
+    const regionName = formatRegionForSheet(sido, sigungu);
     entries.push(`${checked.value}\n${regionName}`);
   });
   return entries.length ? entries.join('\n') : '불가';
+}
+
+function formatRegionForSheet(sido, sigungu) {
+  return (sido + (sigungu ? ' ' + sigungu : '')).replace(/\s*전체\b/g, ' 가능');
 }
 
 function collectData() {
@@ -850,7 +869,7 @@ function collectData() {
         const dateStart = document.getElementById(`date-start-${m}-${idx}`)?.value || '';
         const dateEnd = document.getElementById(`date-end-${m}-${idx}`)?.value || '';
         if(sido) {
-          const regionName = sido + (sigungu ? ' ' + sigungu : '');
+          const regionName = formatRegionForSheet(sido, sigungu);
           const dateRange = dateStart && dateEnd ? `(${dateStart.replace('2026-','')}~${dateEnd.replace('2026-','')})` : '(날짜미정)';
           const daySummary = DAYS.map(day => {
             const checked = document.querySelector(`input[name="sched-${m}-${idx}-${day}"]:checked`);

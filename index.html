@@ -97,14 +97,14 @@
   .range-calendar-help{font-size:11px;font-weight:400;color:var(--text-muted);}
   .range-calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
   .range-calendar-dayname{font-size:11px;text-align:center;color:var(--text-muted);font-weight:600;padding:3px 0;}
-  .range-calendar-date{border:1px solid var(--border);background:#fff;border-radius:5px;min-height:36px;font-size:12px;color:var(--text);cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px;line-height:1.15;}
+  .range-calendar-date{border:1px solid var(--border);background:#fff;border-radius:5px;height:36px;font-size:12px;color:var(--text);cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:2px;line-height:1.05;overflow:hidden;}
   .range-calendar-date:hover{border-color:var(--primary-light);background:#eef6f1;}
   .range-calendar-date.selected{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:700;}
   .range-calendar-date.in-range{background:#eef6f1;border-color:#c9ead8;color:var(--primary);font-weight:600;}
   .range-calendar-date.sat{color:#2563eb;}
   .range-calendar-date.sun,.range-calendar-date.holiday{color:#dc2626;}
   .range-calendar-date.selected .holiday-name{color:#fff;}
-  .holiday-name{font-size:9px;font-weight:600;white-space:nowrap;}
+  .holiday-name{font-size:7px;font-weight:600;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:clip;line-height:1;}
   .range-calendar-date.placeholder{visibility:hidden;pointer-events:none;}
   textarea{resize:vertical;min-height:80px;line-height:1.6;}
   .char-count{font-size:11px;color:var(--text-muted);text-align:right;margin-top:4px;}
@@ -129,7 +129,7 @@
   .loading-overlay p{color:#fff;font-size:14px;font-weight:500;}
   @keyframes spin{to{transform:rotate(360deg);}}
   select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
-  @media(max-width:480px){.row-2,.region-row{grid-template-columns:1fr;}.check-grid{grid-template-columns:repeat(2,1fr);}.range-calendar-date{min-height:42px;}.holiday-name{font-size:8.5px;}.schedule-grid th,.schedule-grid td label{font-size:11px;padding:7px 2px;}.header h1{font-size:18px;}}
+  @media(max-width:480px){.row-2,.region-row{grid-template-columns:1fr;}.check-grid{grid-template-columns:repeat(2,1fr);}.range-calendar-date{height:36px;}.holiday-name{font-size:6.5px;}.schedule-grid th,.schedule-grid td label{font-size:11px;padding:7px 2px;}.header h1{font-size:18px;}}
 </style>
 </head>
 <body>
@@ -1018,7 +1018,7 @@ function collectData() {
       [...document.querySelectorAll('input[name="maker-tool"]:checked')].map(i=>i.value).join(', '),
       [...document.querySelectorAll('input[name="maker-level"]:checked')].map(i=>i.value).join(', ')
     ].filter(Boolean).join(' / '),
-    기타 이력, 지원동기 등: document.getElementById('motivation').value.trim(),
+    '기타 이력, 지원동기 등': document.getElementById('motivation').value.trim(),
     ...sched
   };
 }
